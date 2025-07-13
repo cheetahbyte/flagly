@@ -1,4 +1,4 @@
-package internal
+package flagly
 
 import (
 	"github.com/gin-gonic/gin"

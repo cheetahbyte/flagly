@@ -1,4 +1,4 @@
-package internal
+package flagly
 
 import (
 	"os"
@@ -6,26 +6,17 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-type Condition struct {
-	Environments []string `json:"environments" yaml:"environments"`
-}
-
 type Flag struct {
-	Key         string      `json:"key" yaml:"key"`
-	Description string      `json:"description" yaml:"description"`
-	Enabled     bool        `json:"enabled" yaml:"enabled"`
-	Conditions  []Condition `json:"conditions" yaml:"conditions"`
+	Key         string  `json:"key" yaml:"key"`
+	Description string  `json:"description" yaml:"description"`
+	Enabled     bool    `json:"enabled" yaml:"enabled"`
+	Rollout     Rollout `json:"rollout" yaml:"rollout"`
+	Targeting   Target  `json:"targeting" yaml:"targeting"`
 }
 
 type Storage struct {
 	Flags        []Flag   `json:"flags" yaml:"flags"`
 	Environments []string `json:"environments" yaml:"environments"`
-}
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
 }
 
 var Store *Storage

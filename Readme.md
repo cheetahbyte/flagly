@@ -9,13 +9,11 @@ flags:
   - key: new_login
     description: Aktiviert den neuen Login
     enabled: true
-    conditions:
-      - environments: ["production", "staging"]
-  - key: use_beta_api
-    description: Verwendet die neue Beta API
-    enabled: true
-    conditions:
-      - environments: ["staging"]
+    targeting: 
+      environments: ["production", "staging"]
+    rollout:
+      percentage: 25
+      stickiness: user_id
 
 environments:
   - production
@@ -39,7 +37,7 @@ Note: You have to make sure the new file gets mounted correctly.
 | :------- | :-------------------- | :------------------------------------------------ | 
 | `GET`    | `/flags/`       | Retrieves a list of all flags.                            | 
 | `GET`    | `/flags/:flag`  | Fetches details for a specific flag by their key.           |
-| `GET`    | `/flags/:flag/enabled?environment=<env>`       | Fetches the status for a certain flag.        | 
+| `POST`    | `/flags/:flag/evaluate?environment=<env>`       | Evaluates the status for a certain flag.        | 
 | `GET`    | `/environments`  | Retrieves a list of all environments                   |
 | `GET`    | `/environments/:env`  | Fetches details for a specific environment         | 
 

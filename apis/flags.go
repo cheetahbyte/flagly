@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cheetahbyte/flagly/internal"
+	"github.com/cheetahbyte/flagly/internal/flagly"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,19 +13,19 @@ type FlaglyContext struct {
 }
 
 func GetAllFlags(c *gin.Context) {
-	logger := internal.GetLogger(c)
+	logger := flagly.GetLogger(c)
 	logger.Info("Fetching all flags")
-	c.JSON(200, internal.Store.Flags)
+	c.JSON(200, flagly.Store.Flags)
 }
 
 func GetFlag(c *gin.Context) {
-	logger := internal.GetLogger(c)
+	logger := flagly.GetLogger(c)
 	flag_key := c.Param("flag")
 	logger.Infow("Fetching a single flag",
 		"flag_key", flag_key,
 	)
-	var selectedFlag *internal.Flag
-	for _, f := range internal.Store.Flags {
+	var selectedFlag *flagly.Flag
+	for _, f := range flagly.Store.Flags {
 		if f.Key == flag_key {
 			selectedFlag = &f
 			break
@@ -40,19 +40,24 @@ func GetFlag(c *gin.Context) {
 	c.JSON(200, selectedFlag)
 }
 
-func GetFlagEnabled(c *gin.Context) {
-	logger := internal.GetLogger(c)
-	flag_key := c.Param("flag")
-	environment := c.Query("environment")
-	if environment == "" {
-		c.Error(errors.New(("no environment provided")))
+type PostEvaluateFlagDTO struct {
+	Flag        string      `json:"flag"`
+	User        flagly.User `json:"user"`
+	Environment string      `json:"environment"`
+}
+
+func PostEvaluateFlag(c *gin.Context) {
+	logger := flagly.GetLogger(c)
+	var data PostEvaluateFlagDTO
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Info(err.Error())
+		c.Error(err)
 		return
 	}
-
-	var flag *internal.Flag
-	for _, f := range internal.Store.Flags {
+	var flag *flagly.Flag
+	for _, f := range flagly.Store.Flags {
 		logger.Info(f)
-		if f.Key == flag_key {
+		if f.Key == data.Flag {
 			flag = &f
 		}
 	}
@@ -61,12 +66,12 @@ func GetFlagEnabled(c *gin.Context) {
 		return
 	}
 
-	if !internal.CheckEnvironment(environment, flag.Conditions) {
+	result := flagly.EvaluateFlag(*flag, data.User, data.Environment)
+
+	if !result {
 		c.JSON(200, gin.H{"enabled": false})
 		return
 	}
+	c.JSON(200, gin.H{"enabled": true})
 
-	c.JSON(200, gin.H{
-		"enabled": flag.Enabled,
-	})
 }
