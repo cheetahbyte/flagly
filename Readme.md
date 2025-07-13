@@ -26,7 +26,13 @@ environments:
 ```sh
 docker run -p 8080:8080 -v ./flagly.yml:/root/flagly.yml ghcr.io/cheetahbyte/flagly:latest
 ```
-
+## Configurations
+### Changing the path of `flagly.yml`
+You can change the path of the default `flagly.yml` by providing the -config flag
+```sh
+docker run -p 8080:8080 -v ./flagly.yml:/root/config.yml ghcr.io/cheetahbyte/flagly:latest -config config.yml
+```
+Note: You have to make sure the new file gets mounted correctly.
 
 ## API Reference
 | Method   | Path                  | Description                                       | 

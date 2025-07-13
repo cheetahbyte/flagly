@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -33,6 +34,8 @@ func ErrorHandler() gin.HandlerFunc {
 }
 
 func main() {
+	configFile := flag.String("config", "./flagly.yml", "Path to the configuration file")
+	flag.Parse()
 	router := gin.Default()
 
 	logger := zap.Must(zap.NewDevelopment())
@@ -43,7 +46,9 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	internal.InitStorage()
+	if err := internal.InitStorage(*configFile); err != nil {
+		sugar.Fatalf("Failed to initialize storage: %v", err)
+	}
 
 	router.Use(ErrorHandler())
 	router.Use(gin.Recovery())

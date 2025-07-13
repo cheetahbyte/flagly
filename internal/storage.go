@@ -30,11 +30,16 @@ func check(e error) {
 
 var Store *Storage
 
-func InitStorage() {
+func InitStorage(configFile string) error {
 	cfg := &Storage{}
 	dat, err := os.ReadFile("./flagly.yml")
-	check(err)
+	if err != nil {
+		return err
+	}
 	err = yaml.Unmarshal([]byte(dat), cfg)
-	check(err)
+	if err != nil {
+		return err
+	}
 	Store = cfg
+	return nil
 }
