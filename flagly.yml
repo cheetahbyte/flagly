@@ -1,0 +1,15 @@
+flags:
+  - key: new_button
+    description: enables the new button
+    environments:
+      production:
+        enabled: false
+        rollout:
+          percentage: 25
+          stickiness: user_id
+      staging:
+        enabled: true
+
+environments:
+  - production
+  - staging
