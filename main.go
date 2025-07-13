@@ -7,6 +7,7 @@ import (
 
 	"github.com/cheetahbyte/flagly/apis"
 	"github.com/cheetahbyte/flagly/internal/flagly"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -28,7 +29,7 @@ func main() {
 	if err != nil {
 		sugar.Fatalf("Failed to read file: %v", err)
 	}
-
+	router.Use(cors.Default())
 	router.Use(gin.Recovery())
 	router.Use(flagly.ContextLogger(sugar))
 	router.Use(flagly.ErrorHandlerMiddleware())
