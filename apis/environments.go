@@ -3,17 +3,17 @@ package apis
 import (
 	"errors"
 
-	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/cheetahbyte/flagly/internal"
 	"github.com/gin-gonic/gin"
 )
 
 func GetAllEnvironments(c *gin.Context) {
-	c.JSON(200, storage.Store.Environments)
+	c.JSON(200, internal.Store.Environments)
 }
 
 func GetEnvironment(c *gin.Context) {
 	env_name := c.Param("env")
-	environments := storage.Store.Environments
+	environments := internal.Store.Environments
 
 	for _, env := range environments {
 		if env == env_name {

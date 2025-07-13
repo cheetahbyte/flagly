@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/cheetahbyte/flagly/internal"
-	"github.com/cheetahbyte/flagly/internal/storage"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +15,7 @@ type FlaglyContext struct {
 func GetAllFlags(c *gin.Context) {
 	logger := internal.GetLogger(c)
 	logger.Info("Fetching all flags")
-	c.JSON(200, storage.Store.Flags)
+	c.JSON(200, internal.Store.Flags)
 }
 
 func GetFlag(c *gin.Context) {
@@ -25,8 +24,8 @@ func GetFlag(c *gin.Context) {
 	logger.Infow("Fetching a single flag",
 		"flag_key", flag_key,
 	)
-	var selectedFlag *storage.Flag
-	for _, f := range storage.Store.Flags {
+	var selectedFlag *internal.Flag
+	for _, f := range internal.Store.Flags {
 		if f.Key == flag_key {
 			selectedFlag = &f
 			break
@@ -50,8 +49,8 @@ func GetFlagEnabled(c *gin.Context) {
 		return
 	}
 
-	var flag *storage.Flag
-	for _, f := range storage.Store.Flags {
+	var flag *internal.Flag
+	for _, f := range internal.Store.Flags {
 		logger.Info(f)
 		if f.Key == flag_key {
 			flag = &f
