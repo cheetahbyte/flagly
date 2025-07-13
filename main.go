@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/cheetahbyte/flagly/apis"
-	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/cheetahbyte/flagly/internal"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -43,7 +43,7 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	storage.InitStorage()
+	internal.InitStorage()
 
 	router.Use(ErrorHandler())
 	router.Use(gin.Recovery())
