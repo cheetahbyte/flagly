@@ -6,12 +6,15 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+type Environment struct {
+	Enabled bool
+	Rollout Rollout
+}
+
 type Flag struct {
-	Key         string  `json:"key" yaml:"key"`
-	Description string  `json:"description" yaml:"description"`
-	Enabled     bool    `json:"enabled" yaml:"enabled"`
-	Rollout     Rollout `json:"rollout" yaml:"rollout"`
-	Targeting   Target  `json:"targeting" yaml:"targeting"`
+	Key          string                 `json:"key" yaml:"key"`
+	Description  string                 `json:"description" yaml:"description"`
+	Environments map[string]Environment `json:"environments" yaml:"environments"`
 }
 
 type Storage struct {

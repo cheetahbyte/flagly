@@ -1,7 +1,7 @@
 package flagly
 
 import (
-	"slices"
+	"fmt"
 
 	"github.com/spaolacci/murmur3"
 )
@@ -17,26 +17,19 @@ func calculateRolloutBucket(identifier string) int {
 }
 
 func EvaluateFlag(flag Flag, user User, environment string) bool {
-	// check if environment is right
-	if !slices.Contains(flag.Targeting.Environments, environment) {
+	// check if environment is enabled
+	env, ok := flag.Environments[environment]
+	if !ok {
 		return false
 	}
-
-	if !flag.Enabled {
-		return false
-	}
-
-	// If no rollout defined or 100%, it's fully enabled
-	if flag.Rollout.Percentage == 0 {
-		return true
-	}
-	if flag.Rollout.Percentage >= 100 {
+	fmt.Println(env)
+	if env.Rollout.Percentage == 0 || env.Rollout.Percentage == 100 {
 		return true
 	}
 
 	// TODO: make this more dynamic
 	var stickiness string
-	switch flag.Rollout.Stickiness {
+	switch env.Rollout.Stickiness {
 	case "user_id":
 		stickiness = user.ID
 	default:
@@ -45,5 +38,5 @@ func EvaluateFlag(flag Flag, user User, environment string) bool {
 
 	// Rollout specific logic
 	hashedPercentage := calculateRolloutBucket(stickiness)
-	return flag.Rollout.Percentage > hashedPercentage
+	return env.Rollout.Percentage > hashedPercentage
 }
