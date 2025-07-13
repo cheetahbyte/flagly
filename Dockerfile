@@ -1,5 +1,7 @@
 FROM golang:1.24-alpine AS builder
 
+RUN apk add --no-cache upx
+
 WORKDIR /app
 
 COPY go.mod ./
@@ -8,18 +10,17 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-w -s" -o main .
+
+RUN upx --best --lzma -o main-compressed main
 
 FROM scratch
 
 WORKDIR /root/
 
-COPY --from=builder /app/main .
-
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /app/main-compressed ./main
 
 EXPOSE 8080
-
 ENV PORT=8080
 ENV GIN_MODE=release
 
