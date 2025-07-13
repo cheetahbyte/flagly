@@ -10,9 +10,22 @@ flags:
     description: Aktiviert den neuen Login
     enabled: true
     targeting: 
-      environments: ["production", "staging"]
+      environments: ["production"]
     rollout:
       percentage: 25
+      stickiness: user_id
+      
+  - key: new_dashboard
+    description: Aktiviert das neue Dashboard
+    enabled: true
+    targeting: 
+      environments: ["production", "staging"]
+
+  - key: new_email
+    description: Aktiviert die neue Email
+    enabled: true
+    rollout:
+      percentage: 60
       stickiness: user_id
 
 environments:
