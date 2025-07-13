@@ -1,19 +1,32 @@
 package apis
 
 import (
-	"errors"
+	"net/http"
 
 	"github.com/cheetahbyte/flagly/internal/flagly"
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllEnvironments(c *gin.Context) {
-	c.JSON(200, flagly.Store.Environments)
+type EnvironmentAPI struct {
+	store *flagly.Storage
 }
 
-func GetEnvironment(c *gin.Context) {
+func NewEnvironmentAPI(store *flagly.Storage) *EnvironmentAPI {
+	return &EnvironmentAPI{store: store}
+}
+
+func (api *EnvironmentAPI) RegisterRoutes(router *gin.Engine) {
+	router.GET("/environments", api.GetAllEnvironments)
+	router.GET("/environments/:env", api.GetEnvironment)
+}
+
+func (api *EnvironmentAPI) GetAllEnvironments(c *gin.Context) {
+	c.JSON(200, api.store.Environments)
+}
+
+func (api *EnvironmentAPI) GetEnvironment(c *gin.Context) {
 	env_name := c.Param("env")
-	environments := flagly.Store.Environments
+	environments := api.store.Environments
 
 	for _, env := range environments {
 		if env == env_name {
@@ -21,5 +34,8 @@ func GetEnvironment(c *gin.Context) {
 			return
 		}
 	}
-	c.Error(errors.New("environment not found"))
+	c.Error(flagly.NewAPIError(http.StatusNotFound,
+		"/errors/environment-not-found",
+		"Environment not found",
+		"The requested environment was not found on the server."))
 }

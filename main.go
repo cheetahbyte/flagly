@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/cheetahbyte/flagly/apis"
@@ -11,27 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
-
-func ContextLogger(logger *zap.SugaredLogger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("logger", logger)
-		c.Next()
-	}
-}
-
-func ErrorHandler() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		if len(c.Errors) > 0 {
-			err := c.Errors.Last().Err
-
-			c.JSON(http.StatusInternalServerError, map[string]any{
-				"success": false,
-				"message": err.Error(),
-			})
-		}
-	}
-}
 
 func main() {
 	configFile := flag.String("config", "./flagly.yml", "Path to the configuration file")
@@ -46,20 +24,19 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	if err := flagly.InitStorage(*configFile); err != nil {
-		sugar.Fatalf("Failed to initialize storage: %v", err)
+	store, err := flagly.InitStorage(*configFile)
+	if err != nil {
+		sugar.Fatalf("Failed to read file: %v", err)
 	}
 
-	router.Use(ErrorHandler())
 	router.Use(gin.Recovery())
-	router.Use(ContextLogger(sugar))
+	router.Use(flagly.ContextLogger(sugar))
+	router.Use(flagly.ErrorHandlerMiddleware())
 
-	router.GET("/flags", apis.GetAllFlags)
-	router.GET("/flags/:flag", apis.GetFlag)
-	router.POST("/flags/evaluate", apis.PostEvaluateFlag)
-
-	router.GET("/environments", apis.GetAllEnvironments)
-	router.GET("/environments/:env", apis.GetEnvironment)
+	flagApi := apis.NewFlagAPI(store)
+	environmentApi := apis.NewEnvironmentAPI(store)
+	flagApi.RegisterRoutes(router)
+	environmentApi.RegisterRoutes(router)
 
 	log.Println("Server listening on http://localhost:8080")
 	if err := router.Run(); err != nil {

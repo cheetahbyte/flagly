@@ -22,18 +22,15 @@ type Storage struct {
 	Environments []string `json:"environments" yaml:"environments"`
 }
 
-var Store *Storage
-
-func InitStorage(configFile string) error {
+func InitStorage(configFile string) (*Storage, error) {
 	cfg := &Storage{}
-	dat, err := os.ReadFile("./flagly.yml")
+	dat, err := os.ReadFile(configFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = yaml.Unmarshal([]byte(dat), cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	Store = cfg
-	return nil
+	return cfg, nil
 }

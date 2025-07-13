@@ -1,29 +1,32 @@
 package apis
 
 import (
-	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/cheetahbyte/flagly/internal/flagly"
 	"github.com/gin-gonic/gin"
 )
 
-type FlaglyContext struct {
-	Environment string `json:"environment" binding:"required"`
+type FlagAPI struct {
+	store *flagly.Storage
 }
 
-func GetAllFlags(c *gin.Context) {
-	logger := flagly.GetLogger(c)
-	logger.Info("Attempting to fetch all flags")
-
-	flags := flagly.Store.Flags
-	logger.Infow("Successfully fetched all flags",
-		"count", len(flags),
-	)
-	c.JSON(200, flags)
+func NewFlagAPI(store *flagly.Storage) *FlagAPI {
+	return &FlagAPI{store: store}
 }
 
-func GetFlag(c *gin.Context) {
+func (api *FlagAPI) RegisterRoutes(router *gin.Engine) {
+	router.GET("/flags", api.GetFlags)
+	router.GET("/flags/:flag", api.GetFlag)
+	router.POST("/flags/evaluate", api.PostEvaluateFlag)
+}
+
+func (api *FlagAPI) GetFlags(c *gin.Context) {
+	c.JSON(http.StatusOK, api.store.Flags)
+}
+
+func (api *FlagAPI) GetFlag(c *gin.Context) {
 	logger := flagly.GetLogger(c)
 	flagKey := c.Param("flag")
 
@@ -32,7 +35,7 @@ func GetFlag(c *gin.Context) {
 	)
 
 	var selectedFlag *flagly.Flag
-	for _, f := range flagly.Store.Flags {
+	for _, f := range api.store.Flags {
 		if f.Key == flagKey {
 			selectedFlag = &f
 			break
@@ -44,7 +47,10 @@ func GetFlag(c *gin.Context) {
 		logger.Warnw(msg,
 			"flag_key", flagKey,
 		)
-		c.Error(errors.New("flag not found"))
+		c.Error(flagly.NewAPIError(http.StatusNotFound,
+			"/errors/flag-not-found",
+			"Flag not found",
+			"The requested flag was not found on the server."))
 		return
 	}
 
@@ -60,7 +66,7 @@ type PostEvaluateFlagDTO struct {
 	Environment string      `json:"environment"`
 }
 
-func PostEvaluateFlag(c *gin.Context) {
+func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
 	logger := flagly.GetLogger(c)
 	var data PostEvaluateFlagDTO
 
@@ -79,7 +85,7 @@ func PostEvaluateFlag(c *gin.Context) {
 	)
 
 	var flag *flagly.Flag
-	for _, f := range flagly.Store.Flags {
+	for _, f := range api.store.Flags {
 		if f.Key == data.Flag {
 			flag = &f
 			break
@@ -90,7 +96,10 @@ func PostEvaluateFlag(c *gin.Context) {
 		logger.Warnw("Evaluation failed because flag was not found",
 			"flag_key", data.Flag,
 		)
-		c.Error(errors.New("flag not found"))
+		c.Error(flagly.NewAPIError(http.StatusNotFound,
+			"/errors/flag-not-found",
+			"Flag not found",
+			"The requested flag was not found on the server."))
 		return
 	}
 
