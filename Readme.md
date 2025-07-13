@@ -33,7 +33,7 @@ docker run -p 8080:8080 -v ./flagly.yml:/root/flagly.yml ghcr.io/cheetahbyte/fla
 | :------- | :-------------------- | :------------------------------------------------ | 
 | `GET`    | `/flags/`       | Retrieves a list of all flags.                            | 
 | `GET`    | `/flags/:flag`  | Fetches details for a specific flag by their key.           |
-| `GET`    | `/flags/:flag/enabled`       | Fetches the status for a certain flag.        | 
+| `GET`    | `/flags/:flag/enabled?environment=<env>`       | Fetches the status for a certain flag.        | 
 | `GET`    | `/environments`  | Retrieves a list of all environments                   |
 | `GET`    | `/environments/:env`  | Fetches details for a specific environment         | 
 

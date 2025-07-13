@@ -44,12 +44,7 @@ func GetFlag(c *gin.Context) {
 func GetFlagEnabled(c *gin.Context) {
 	logger := internal.GetLogger(c)
 	flag_key := c.Param("flag")
-	var ctx FlaglyContext
-	if err := c.ShouldBindJSON(&ctx); err != nil {
-		logger.Errorf("Failed to bind JSON for GetFlagEnabled: %v", err)
-		c.Error(errors.New("unprocessable entity: 'environment' is required in the JSON body"))
-		return
-	}
+	environment := c.Query("environment")
 	var flag *storage.Flag
 	for _, f := range storage.Store.Flags {
 		logger.Info(f)
@@ -62,7 +57,7 @@ func GetFlagEnabled(c *gin.Context) {
 		return
 	}
 
-	if !internal.CheckEnvironment(ctx.Environment, flag.Conditions) {
+	if !internal.CheckEnvironment(environment, flag.Conditions) {
 		c.JSON(200, gin.H{"enabled": false})
 		return
 	}
