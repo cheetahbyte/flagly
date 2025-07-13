@@ -6,16 +6,16 @@ Flagly is a dead-simple feature flag server.
 Example:
 ```yml
 flags:
-  - key: new_login
-    description: Aktiviert den neuen Login
-    enabled: true
-    conditions:
-      - environments: ["production", "staging"]
-  - key: use_beta_api
-    description: Verwendet die neue Beta API
-    enabled: true
-    conditions:
-      - environments: ["staging"]
+  - key: new_dashboard
+    description: Enables the new dashboard
+    environments:
+      production:
+        enabled: false
+        rollout:
+          percentage: 25
+          stickiness: user_id
+      staging:
+        enabled: true
 
 environments:
   - production
@@ -35,13 +35,14 @@ docker run -p 8080:8080 -v ./flagly.yml:/root/config.yml ghcr.io/cheetahbyte/fla
 Note: You have to make sure the new file gets mounted correctly.
 
 ## API Reference
-| Method   | Path                  | Description                                       | 
-| :------- | :-------------------- | :------------------------------------------------ | 
-| `GET`    | `/flags/`       | Retrieves a list of all flags.                            | 
-| `GET`    | `/flags/:flag`  | Fetches details for a specific flag by their key.           |
-| `GET`    | `/flags/:flag/enabled?environment=<env>`       | Fetches the status for a certain flag.        | 
-| `GET`    | `/environments`  | Retrieves a list of all environments                   |
-| `GET`    | `/environments/:env`  | Fetches details for a specific environment         | 
+| Method | Path                 | Description                                    | Body                                                               |
+| :----- | :------------------- | :--------------------------------------------- | :----------------------------------------------------------------- |
+| `GET`  | `/flags/`            | Retrieves a list of all flags.                 | –                                                                  |
+| `GET`  | `/flags/:flag`       | Fetches details for a specific flag by key.    | –                                                                  |
+| `POST` | `/flags/evaluate`    | Evaluates the status of a flag for a user/env. | `{ "flag": "key", "environment": "production", "user": { "id": "..." } }` |
+| `GET`  | `/environments`      | Retrieves a list of all environments.          | –                                                                  |
+| `GET`  | `/environments/:env` | Fetches details for a specific environment.    | –                                                                  |
+
 
 ## Future Plans
 Future plans for flagly include:

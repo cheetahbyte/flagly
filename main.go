@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/cheetahbyte/flagly/apis"
-	"github.com/cheetahbyte/flagly/internal"
+	"github.com/cheetahbyte/flagly/internal/flagly"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -46,7 +46,7 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	if err := internal.InitStorage(*configFile); err != nil {
+	if err := flagly.InitStorage(*configFile); err != nil {
 		sugar.Fatalf("Failed to initialize storage: %v", err)
 	}
 
@@ -56,7 +56,7 @@ func main() {
 
 	router.GET("/flags", apis.GetAllFlags)
 	router.GET("/flags/:flag", apis.GetFlag)
-	router.GET("/flags/:flag/enabled", apis.GetFlagEnabled)
+	router.POST("/flags/evaluate", apis.PostEvaluateFlag)
 
 	router.GET("/environments", apis.GetAllEnvironments)
 	router.GET("/environments/:env", apis.GetEnvironment)
