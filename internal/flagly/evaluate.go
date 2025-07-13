@@ -22,6 +22,18 @@ func EvaluateFlag(flag Flag, user User, environment string) bool {
 		return false
 	}
 
+	if !flag.Enabled {
+		return false
+	}
+
+	// If no rollout defined or 100%, it's fully enabled
+	if flag.Rollout.Percentage == 0 {
+		return true
+	}
+	if flag.Rollout.Percentage >= 100 {
+		return true
+	}
+
 	// TODO: make this more dynamic
 	var stickiness string
 	switch flag.Rollout.Stickiness {
