@@ -18,10 +18,10 @@ FROM scratch
 
 WORKDIR /root/
 
-COPY --from=builder /app/main-compressed ./main
+COPY --from=builder /app/main-compressed ./flagly
 
 EXPOSE 8080
 ENV PORT=8080
 ENV GIN_MODE=release
 
-CMD ["./main"]
+ENTRYPOINT ["./flagly"]
