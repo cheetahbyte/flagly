@@ -1,0 +1,73 @@
+package apis
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/cheetahbyte/flagly/internal"
+	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/gin-gonic/gin"
+)
+
+type FlaglyContext struct {
+	Environment string `json:"environment" binding:"required"`
+}
+
+func GetAllFlags(c *gin.Context) {
+	logger := internal.GetLogger(c)
+	logger.Info("Fetching all flags")
+	c.JSON(200, storage.Store.Flags)
+}
+
+func GetFlag(c *gin.Context) {
+	logger := internal.GetLogger(c)
+	flag_key := c.Param("flag")
+	logger.Infow("Fetching a single flag",
+		"flag_key", flag_key,
+	)
+	var selectedFlag *storage.Flag
+	for _, f := range storage.Store.Flags {
+		if f.Key == flag_key {
+			selectedFlag = &f
+			break
+		}
+	}
+	if selectedFlag == nil {
+		msg := fmt.Sprintf("flag '%s' not found", flag_key)
+		logger.Warn(msg)
+		c.Error(errors.New("flag not found"))
+		return
+	}
+	c.JSON(200, selectedFlag)
+}
+
+func GetFlagEnabled(c *gin.Context) {
+	logger := internal.GetLogger(c)
+	flag_key := c.Param("flag")
+	var ctx FlaglyContext
+	if err := c.ShouldBindJSON(&ctx); err != nil {
+		logger.Errorf("Failed to bind JSON for GetFlagEnabled: %v", err)
+		c.Error(errors.New("unprocessable entity: 'environment' is required in the JSON body"))
+		return
+	}
+	var flag *storage.Flag
+	for _, f := range storage.Store.Flags {
+		logger.Info(f)
+		if f.Key == flag_key {
+			flag = &f
+		}
+	}
+	if flag == nil {
+		c.Error(errors.New(("flag not found")))
+		return
+	}
+
+	if !internal.CheckEnvironment(ctx.Environment, flag.Conditions) {
+		c.JSON(200, gin.H{"enabled": false})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"enabled": flag.Enabled,
+	})
+}
