@@ -24,7 +24,7 @@ environments:
 ### 2. Run the container
 
 ```sh
-docker run -p 8080:8080 -v ./flagly.yml:/root/flagly.yml flagly:latest
+docker run -p 8080:8080 -v ./flagly.yml:/root/flagly.yml cheetahbyte/flagly:latest
 ```
 
 
