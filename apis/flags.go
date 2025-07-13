@@ -45,6 +45,11 @@ func GetFlagEnabled(c *gin.Context) {
 	logger := internal.GetLogger(c)
 	flag_key := c.Param("flag")
 	environment := c.Query("environment")
+	if environment == "" {
+		c.Error(errors.New(("no environment provided")))
+		return
+	}
+
 	var flag *storage.Flag
 	for _, f := range storage.Store.Flags {
 		logger.Info(f)
