@@ -15,9 +15,9 @@ func NewEnvironmentAPI(store *flagly.Storage) *EnvironmentAPI {
 	return &EnvironmentAPI{store: store}
 }
 
-func (api *EnvironmentAPI) RegisterRoutes(router *gin.Engine) {
-	router.GET("/api/environments", api.GetAllEnvironments)
-	router.GET("/api/environments/:env", api.GetEnvironment)
+func (api *EnvironmentAPI) RegisterRoutes(router *gin.RouterGroup) {
+	router.GET("/environments", api.GetAllEnvironments)
+	router.GET("/environments/:env", api.GetEnvironment)
 }
 
 func (api *EnvironmentAPI) GetAllEnvironments(c *gin.Context) {

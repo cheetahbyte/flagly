@@ -16,11 +16,11 @@ export function App() {
 
   useEffect(() => {
     const fetchFlags = async () => {
-      const res = await apiClient.get<Flag[]>("/api/flags");
+      const res = await apiClient.get<Flag[]>("/flags");
       setFlags(res);
     };
     const fetchEnvironments = async () => {
-      const res = await apiClient.get<string[]>("/api/environments");
+      const res = await apiClient.get<string[]>("/environments");
       setEnvironments(res);
     };
     fetchFlags();

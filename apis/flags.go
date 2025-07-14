@@ -16,10 +16,10 @@ func NewFlagAPI(store *flagly.Storage) *FlagAPI {
 	return &FlagAPI{store: store}
 }
 
-func (api *FlagAPI) RegisterRoutes(router *gin.Engine) {
-	router.GET("/api/flags", api.GetFlags)
-	router.GET("/api/flags/:flag", api.GetFlag)
-	router.POST("/api/flags/evaluate", api.PostEvaluateFlag)
+func (api *FlagAPI) RegisterRoutes(router *gin.RouterGroup) {
+	router.GET("/flags", api.GetFlags)
+	router.GET("/flags/:flag", api.GetFlag)
+	router.POST("/flags/evaluate", api.PostEvaluateFlag)
 }
 
 func (api *FlagAPI) GetFlags(c *gin.Context) {

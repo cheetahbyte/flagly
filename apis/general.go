@@ -15,9 +15,9 @@ func NewGeneralAPI(store *flagly.Storage) *GeneralAPI {
 	return &GeneralAPI{store: store}
 }
 
-func (api *GeneralAPI) RegisterRoutes(router *gin.Engine) {
-	router.GET("/api/status", api.GetStatus)
-	router.GET("/api/health", api.GetHealth)
+func (api *GeneralAPI) RegisterRoutes(router *gin.RouterGroup) {
+	router.GET("/status", api.GetStatus)
+	router.GET("/health", api.GetHealth)
 }
 
 func (g *GeneralAPI) GetStatus(c *gin.Context) {

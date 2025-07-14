@@ -1,5 +1,8 @@
 export class ApiClient {
-  private baseUrl: string = process.env.BUN_PUBLIC_URL;
+  private baseUrl: string =
+    typeof process !== "undefined" && process.env.BUN_PUBLIC_URL
+      ? process.env.BUN_PUBLIC_URL
+      : "/api";
 
   private async request<T>(
     url: string,

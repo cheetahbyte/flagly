@@ -1,9 +1,12 @@
 package main
 
 import (
+	"embed"
 	"flag"
-	"log"
+	"io/fs"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/cheetahbyte/flagly/apis"
 	"github.com/cheetahbyte/flagly/internal/flagly"
@@ -12,37 +15,72 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:embed all:dashboard/dist
+var embeddedFS embed.FS
+
 func main() {
 	configFile := flag.String("config", "./flagly.yml", "Path to the configuration file")
 	flag.Parse()
-	router := gin.Default()
 
 	logger := zap.Must(zap.NewDevelopment())
 	if os.Getenv("GIN_MODE") == "release" {
 		logger = zap.Must(zap.NewProduction())
 	}
-
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
 	store, err := flagly.InitStorage(*configFile)
 	if err != nil {
-		sugar.Fatalf("Failed to read file: %v", err)
+		sugar.Fatalf("Failed to initialize storage from config file '%s': %v", *configFile, err)
 	}
+
+	router := gin.Default()
 	router.Use(cors.Default())
 	router.Use(gin.Recovery())
 	router.Use(flagly.ContextLogger(sugar))
 	router.Use(flagly.ErrorHandlerMiddleware())
 
-	flagApi := apis.NewFlagAPI(store)
-	environmentApi := apis.NewEnvironmentAPI(store)
-	generalApi := apis.NewGeneralAPI(store)
-	generalApi.RegisterRoutes(router)
-	flagApi.RegisterRoutes(router)
-	environmentApi.RegisterRoutes(router)
+	apiGroup := router.Group("/api")
+	apis.NewGeneralAPI(store).RegisterRoutes(apiGroup)
+	apis.NewFlagAPI(store).RegisterRoutes(apiGroup)
+	apis.NewEnvironmentAPI(store).RegisterRoutes(apiGroup)
 
-	log.Println("Server listening on http://localhost:8080")
-	if err := router.Run(); err != nil {
-		log.Fatalf("Error starting server: %v", err)
+	if os.Getenv("GIN_MODE") == "release" {
+		distFS, err := fs.Sub(embeddedFS, "dashboard/dist")
+		if err != nil {
+			sugar.Fatalf("Failed to create sub-filesystem for embedded assets: %v", err)
+		}
+		fileServer := http.FileServer(http.FS(distFS))
+
+		router.NoRoute(func(c *gin.Context) {
+			if strings.HasPrefix(c.Request.URL.Path, "/api") {
+				c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+				return
+			}
+
+			filePath := strings.TrimPrefix(c.Request.URL.Path, "/")
+			_, err := distFS.Open(filePath)
+
+			if err != nil {
+				indexBytes, readErr := fs.ReadFile(distFS, "index.html")
+				if readErr != nil {
+					sugar.Error("Could not read index.html from embedded fs", zap.Error(readErr))
+					c.String(http.StatusInternalServerError, "index.html not found")
+					return
+				}
+				c.Data(http.StatusOK, "text/html; charset=utf-8", indexBytes)
+			} else {
+				fileServer.ServeHTTP(c.Writer, c.Request)
+			}
+		})
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	sugar.Infof("Server listening on http://localhost:%s", port)
+	if err := router.Run(":" + port); err != nil {
+		sugar.Fatalf("Error starting server: %v", err)
 	}
 }

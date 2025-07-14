@@ -10,7 +10,7 @@ export default function AppHeader() {
 
   useEffect(() => {
     const fetchServerState = async () => {
-      const res = await apiClient.get<ApiStatusResponse>("/api/status");
+      const res = await apiClient.get<ApiStatusResponse>("/status");
       setVersion(res.version);
     };
     fetchServerState();
