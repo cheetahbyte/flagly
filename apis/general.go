@@ -21,9 +21,8 @@ func (api *GeneralAPI) RegisterRoutes(router *gin.RouterGroup) {
 }
 
 func (g *GeneralAPI) GetStatus(c *gin.Context) {
-	version := "dirty"
 	c.JSON(http.StatusOK, gin.H{
-		"version": version,
+		"version": flagly.Version,
 	})
 }
 

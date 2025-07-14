@@ -51,3 +51,7 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
             docker.io/${{ github.repository }}:${{ steps.vars.outputs.tag }}
             docker.io/${{ github.repository }}:latest
+          build-args: |
+            GIT_TAG=${{ steps.vars.outputs.tag }}
+            GIT_COMMIT=${{ steps.vars.outputs.commit }}
+            BUILD_TIME=${{ steps.vars.outputs.time }}
