@@ -7,8 +7,8 @@ import (
 )
 
 type Environment struct {
-	Enabled bool
-	Rollout Rollout
+	Enabled bool    `json:"enabled"`
+	Rollout Rollout `json:"rollout"`
 }
 
 type Flag struct {
