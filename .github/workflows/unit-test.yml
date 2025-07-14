@@ -28,4 +28,4 @@ jobs:
 
       - name: Upload coverage report
         if: always()
-        run: go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out
+        run: go test -tags=test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out
