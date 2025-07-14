@@ -36,6 +36,8 @@ func main() {
 
 	flagApi := apis.NewFlagAPI(store)
 	environmentApi := apis.NewEnvironmentAPI(store)
+	generalApi := apis.NewGeneralAPI(store)
+	generalApi.RegisterRoutes(router)
 	flagApi.RegisterRoutes(router)
 	environmentApi.RegisterRoutes(router)
 
