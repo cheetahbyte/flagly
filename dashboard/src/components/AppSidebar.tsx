@@ -38,7 +38,7 @@ const applicationItems = [
     title: "Environments",
     url: "#",
     icon: Globe,
-    disabled: false,
+    disabled: true,
   },
   {
     title: "Analytics",
@@ -59,7 +59,7 @@ const managmentItems = [
     title: "Audit Logs",
     url: "#",
     icon: Activity,
-    disabled: false,
+    disabled: true,
   },
   {
     title: "API Keys",

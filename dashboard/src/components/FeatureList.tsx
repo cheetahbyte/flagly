@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { InfoIcon } from "lucide-react";
 import type { Environment, Flag } from "@/lib/types";
+import { Badge } from "./ui/badge";
 
 interface FeatureListProps {
   flags: Flag[];
@@ -45,7 +46,10 @@ export default function FeatureList({ flags, environments }: FeatureListProps) {
         <Alert className={`flex w-fit my-custom-alert-class`}>
           <InfoIcon />
           <AlertTitle className="text-left">
-            System is running in immutable mode.
+            System is running in immutable mode.{" "}
+            <a href="https://github.com/cheetahbyte/flagly/wiki/Immutable-Mode--&-GitOps-Mode">
+              Learn more
+            </a>
           </AlertTitle>
         </Alert>
         <DropdownMenu>
@@ -78,12 +82,12 @@ export default function FeatureList({ flags, environments }: FeatureListProps) {
       {flags.map((feature) => {
         const environmentData = feature.environments[selectedGlobalEnvironment];
         const isFeatureEnabled = environmentData?.enabled || false;
-
-        let effectiveRolloutPercentage;
-        if (environmentData?.rollout?.percentage !== undefined) {
-          effectiveRolloutPercentage = environmentData.rollout.percentage;
-        } else {
-          effectiveRolloutPercentage = isFeatureEnabled ? 100 : 0;
+        let effectiveRolloutPercentage = 0; // Default to 0
+        const rolloutPercentage = environmentData?.rollout?.percentage;
+        if (environmentData?.enabled && rolloutPercentage === 0) {
+          effectiveRolloutPercentage = 100;
+        } else if (rolloutPercentage !== undefined) {
+          effectiveRolloutPercentage = rolloutPercentage;
         }
 
         return (
@@ -102,18 +106,26 @@ export default function FeatureList({ flags, environments }: FeatureListProps) {
                   }
                 />
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 text-left">
-                    {formatKeyAsTitle(feature.key)}
+                  <h3 className="text-lg font-semibold text-gray-900 text-left flex items-center gap-2">
+                    {formatKeyAsTitle(feature.key)}{" "}
+                    <Badge variant={"outline"}>{feature.key}</Badge>
                   </h3>
-                  <p className="text-sm text-gray-600">{feature.description}</p>
+                  <p className="text-sm text-gray-600 text-left">
+                    {feature.description}
+                  </p>
                 </div>
               </div>
               <div className="flex flex-col items-end text-right ml-auto">
-                <div className="text-xl font-bold text-gray-900">
+                {/* TODO: enable this again later */}
+                {/* <div className="text-xl font-bold text-gray-900">
                   {feature.usage} usage
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {effectiveRolloutPercentage}% rollout
+                </div> */}
+                <div className="text-xl font-bold text-gray-900">
+                  {environmentData?.enabled &&
+                    effectiveRolloutPercentage + "%rollout"}
                 </div>
               </div>
             </CardContent>

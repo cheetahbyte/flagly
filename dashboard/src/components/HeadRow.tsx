@@ -30,12 +30,12 @@ export function HeadRow({ flags, environments }: HeadRowProps) {
       />
       <StatCard
         title="Total Evaluations"
-        value="10"
+        value="not implemented"
         description="Last 24 hours"
       />
       <StatCard
         title="Evaluation Time"
-        value="2ms"
+        value="not implemented"
         description="Average latency when evaluating"
       />
     </div>

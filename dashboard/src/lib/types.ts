@@ -5,9 +5,14 @@ export type Flag = {
   usage: number;
 };
 
+export type Rollout = {
+  percentage?: number;
+  stickiness?: number;
+};
+
 export type Environment = {
   enabled: boolean;
-  rollout?: any;
+  rollout?: Rollout;
 };
 
 export type ApiStatusResponse = {
