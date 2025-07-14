@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/cheetahbyte/flagly/compare/v0.3.0...v0.3.1) (2025-07-14)
+
+
+### Bug Fixes
+
+* api routes not working ([#8](https://github.com/cheetahbyte/flagly/issues/8)) ([de66a99](https://github.com/cheetahbyte/flagly/commit/de66a995c29562547f14706d0c80d84dae1197cf))
+
 ## [0.3.0](https://github.com/cheetahbyte/flagly/compare/v0.2.0...v0.3.0) (2025-07-13)
 
 
