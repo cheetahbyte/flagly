@@ -1,0 +1,21 @@
+meta {
+  name: Get Flag Enabled
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/flags/evaluate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "flag": "new_test",
+    "user": {
+      "id": "10102012"
+    },
+    "environment": "staging"
+  }
+}

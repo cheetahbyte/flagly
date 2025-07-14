@@ -16,7 +16,7 @@ func NewFlagAPI(store *flagly.Storage) *FlagAPI {
 	return &FlagAPI{store: store}
 }
 
-func (api *FlagAPI) RegisterRoutes(router *gin.Engine) {
+func (api *FlagAPI) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("/flags", api.GetFlags)
 	router.GET("/flags/:flag", api.GetFlag)
 	router.POST("/flags/evaluate", api.PostEvaluateFlag)
