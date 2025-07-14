@@ -1,7 +1,6 @@
 FROM oven/bun:1 AS frontend
 WORKDIR /app
 
-# Copy package manager files and install 
 COPY dashboard/package.json dashboard/bun.lockb* ./dashboard/
 RUN cd dashboard && bun install --frozen-lockfile
 
@@ -10,20 +9,26 @@ RUN cd dashboard && bun run build
 
 FROM golang:1.24-alpine AS builder
 
-RUN apk add --no-cache upx
+RUN apk add --no-cache upx git
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
+
 COPY --from=frontend /app/dashboard/dist ./dashboard/dist
-RUN echo "🎯 Embedded dist/index.html (Preview):" && \
-    ls -lh dashboard/dist/index.html && \
-    head  dashboard/dist/index.html
 COPY . .
 
-RUN GIN_MODE=release CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-w -s" -o main .
+ARG GIT_TAG
+ARG GIT_COMMIT
+ARG BUILD_TIME
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
+  -ldflags "-w -s \
+    -X github.com/cheetahbyte/flagly/internal/flagly.Version=${GIT_TAG} \
+    -X github.com/cheetahbyte/flagly/internal/flagly.Commit=${GIT_COMMIT} \
+    -X github.com/cheetahbyte/flagly/internal/flagly.BuildTime=${BUILD_TIME}" \
+  -o main .
 
 RUN upx --best --lzma -o main-compressed main
 
