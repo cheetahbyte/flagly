@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/cheetahbyte/flagly/compare/v0.3.1...v0.4.0) (2025-07-15)
+
+
+### Features
+
+* **modularity:** add audit service ([#10](https://github.com/cheetahbyte/flagly/issues/10)) ([19ec848](https://github.com/cheetahbyte/flagly/commit/19ec84849a952263d78a16c0665ab1e6e3c65d26))
+
 ## [0.3.1](https://github.com/cheetahbyte/flagly/compare/v0.3.0...v0.3.1) (2025-07-14)
 
 
