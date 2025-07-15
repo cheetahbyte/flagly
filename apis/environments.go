@@ -4,15 +4,15 @@ import (
 	"net/http"
 
 	custom_errors "github.com/cheetahbyte/flagly/internal/error"
-	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/cheetahbyte/flagly/pkg/flagly"
 	"github.com/gin-gonic/gin"
 )
 
 type EnvironmentAPI struct {
-	store *storage.Storage
+	store *flagly.Storage
 }
 
-func NewEnvironmentAPI(store *storage.Storage) *EnvironmentAPI {
+func NewEnvironmentAPI(store *flagly.Storage) *EnvironmentAPI {
 	return &EnvironmentAPI{store: store}
 }
 

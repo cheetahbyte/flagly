@@ -6,18 +6,17 @@ import (
 
 	custom_errors "github.com/cheetahbyte/flagly/internal/error"
 	"github.com/cheetahbyte/flagly/internal/evaluation"
-	"github.com/cheetahbyte/flagly/internal/storage"
 	"github.com/cheetahbyte/flagly/internal/utils"
 	"github.com/cheetahbyte/flagly/pkg/flagly"
 	"github.com/gin-gonic/gin"
 )
 
 type FlagAPI struct {
-	store        *storage.Storage
+	store        *flagly.Storage
 	auditService flagly.AuditService
 }
 
-func NewFlagAPI(store *storage.Storage, auditService flagly.AuditService) *FlagAPI {
+func NewFlagAPI(store *flagly.Storage, auditService flagly.AuditService) *FlagAPI {
 	return &FlagAPI{store: store, auditService: auditService}
 }
 

@@ -7,13 +7,8 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-type Storage struct {
-	Flags        []flagly.Flag `json:"flags" yaml:"flags"`
-	Environments []string      `json:"environments" yaml:"environments"`
-}
-
-func InitStorage(configFile string) (*Storage, error) {
-	cfg := &Storage{}
+func InitStorage(configFile string) (*flagly.Storage, error) {
+	cfg := &flagly.Storage{}
 	dat, err := os.ReadFile(configFile)
 	if err != nil {
 		return nil, err

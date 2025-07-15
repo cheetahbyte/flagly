@@ -3,16 +3,16 @@ package apis
 import (
 	"net/http"
 
-	"github.com/cheetahbyte/flagly/internal/storage"
 	"github.com/cheetahbyte/flagly/internal/version"
+	"github.com/cheetahbyte/flagly/pkg/flagly"
 	"github.com/gin-gonic/gin"
 )
 
 type GeneralAPI struct {
-	store *storage.Storage
+	store *flagly.Storage
 }
 
-func NewGeneralAPI(store *storage.Storage) *GeneralAPI {
+func NewGeneralAPI(store *flagly.Storage) *GeneralAPI {
 	return &GeneralAPI{store: store}
 }
 
