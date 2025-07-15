@@ -1,9 +1,10 @@
-package flagly
+package middleware
 
 import (
 	"log"
 	"net/http"
 
+	custom_errors "github.com/cheetahbyte/flagly/internal/error"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -22,7 +23,7 @@ func ErrorHandlerMiddleware() gin.HandlerFunc {
 			err := c.Errors[0].Err
 			log.Printf("Request error: %v", err)
 			c.Header("Content-Type", "application/problem+json")
-			if apiErr, ok := err.(*APIError); ok {
+			if apiErr, ok := err.(*custom_errors.APIError); ok {
 				c.JSON(apiErr.Status, gin.H{
 					"type":     apiErr.Type,
 					"title":    apiErr.Title,

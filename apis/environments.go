@@ -3,15 +3,16 @@ package apis
 import (
 	"net/http"
 
-	"github.com/cheetahbyte/flagly/internal/flagly"
+	custom_errors "github.com/cheetahbyte/flagly/internal/error"
+	"github.com/cheetahbyte/flagly/internal/storage"
 	"github.com/gin-gonic/gin"
 )
 
 type EnvironmentAPI struct {
-	store *flagly.Storage
+	store *storage.Storage
 }
 
-func NewEnvironmentAPI(store *flagly.Storage) *EnvironmentAPI {
+func NewEnvironmentAPI(store *storage.Storage) *EnvironmentAPI {
 	return &EnvironmentAPI{store: store}
 }
 
@@ -34,7 +35,7 @@ func (api *EnvironmentAPI) GetEnvironment(c *gin.Context) {
 			return
 		}
 	}
-	c.Error(flagly.NewAPIError(http.StatusNotFound,
+	c.Error(custom_errors.NewAPIError(http.StatusNotFound,
 		"/errors/environment-not-found",
 		"Environment not found",
 		"The requested environment was not found on the server."))

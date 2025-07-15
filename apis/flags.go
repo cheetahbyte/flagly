@@ -4,16 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cheetahbyte/flagly/internal/flagly"
+	custom_errors "github.com/cheetahbyte/flagly/internal/error"
+	"github.com/cheetahbyte/flagly/internal/evaluation"
+	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/cheetahbyte/flagly/internal/utils"
+	"github.com/cheetahbyte/flagly/pkg/flagly"
 	"github.com/gin-gonic/gin"
 )
 
 type FlagAPI struct {
-	store *flagly.Storage
+	store        *storage.Storage
+	auditService flagly.AuditService
 }
 
-func NewFlagAPI(store *flagly.Storage) *FlagAPI {
-	return &FlagAPI{store: store}
+func NewFlagAPI(store *storage.Storage, auditService flagly.AuditService) *FlagAPI {
+	return &FlagAPI{store: store, auditService: auditService}
 }
 
 func (api *FlagAPI) RegisterRoutes(router *gin.RouterGroup) {
@@ -27,7 +32,7 @@ func (api *FlagAPI) GetFlags(c *gin.Context) {
 }
 
 func (api *FlagAPI) GetFlag(c *gin.Context) {
-	logger := flagly.GetLogger(c)
+	logger := utils.GetLogger(c)
 	flagKey := c.Param("flag")
 
 	logger.Infow("Attempting to fetch a single flag",
@@ -47,7 +52,7 @@ func (api *FlagAPI) GetFlag(c *gin.Context) {
 		logger.Warnw(msg,
 			"flag_key", flagKey,
 		)
-		c.Error(flagly.NewAPIError(http.StatusNotFound,
+		c.Error(custom_errors.NewAPIError(http.StatusNotFound,
 			"/errors/flag-not-found",
 			"Flag not found",
 			"The requested flag was not found on the server."))
@@ -67,7 +72,7 @@ type PostEvaluateFlagDTO struct {
 }
 
 func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
-	logger := flagly.GetLogger(c)
+	logger := utils.GetLogger(c)
 	var data PostEvaluateFlagDTO
 
 	if err := c.ShouldBind(&data); err != nil {
@@ -77,12 +82,6 @@ func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-
-	logger.Infow("Attempting to evaluate a flag",
-		"flag_key", data.Flag,
-		"user_id", data.User.ID,
-		"environment", data.Environment,
-	)
 
 	var flag *flagly.Flag
 	for _, f := range api.store.Flags {
@@ -96,21 +95,16 @@ func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
 		logger.Warnw("Evaluation failed because flag was not found",
 			"flag_key", data.Flag,
 		)
-		c.Error(flagly.NewAPIError(http.StatusNotFound,
+		c.Error(custom_errors.NewAPIError(http.StatusNotFound,
 			"/errors/flag-not-found",
 			"Flag not found",
 			"The requested flag was not found on the server."))
 		return
 	}
 
-	result := flagly.EvaluateFlag(*flag, data.User, data.Environment)
+	result := evaluation.EvaluateFlag(*flag, data.User, data.Environment)
 
-	logger.Infow("Flag evaluation completed",
-		"flag_key", flag.Key,
-		"user_id", data.User.ID,
-		"environment", data.Environment,
-		"result", result,
-	)
+	api.auditService.TrackEvaluation(c, *flag, data.User, data.Environment, result)
 
 	c.JSON(200, gin.H{"enabled": result})
 }

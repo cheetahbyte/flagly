@@ -11,7 +11,9 @@ import (
 	"strings"
 
 	"github.com/cheetahbyte/flagly/apis"
-	"github.com/cheetahbyte/flagly/internal/flagly"
+	"github.com/cheetahbyte/flagly/internal/audit"
+	"github.com/cheetahbyte/flagly/internal/middleware"
+	"github.com/cheetahbyte/flagly/internal/storage"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -31,7 +33,7 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	store, err := flagly.InitStorage(*configFile)
+	store, err := storage.InitStorage(*configFile)
 	if err != nil {
 		sugar.Fatalf("Failed to initialize storage from config file '%s': %v", *configFile, err)
 	}
@@ -39,12 +41,14 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.Use(gin.Recovery())
-	router.Use(flagly.ContextLogger(sugar))
-	router.Use(flagly.ErrorHandlerMiddleware())
+	router.Use(middleware.ContextLogger(sugar))
+	router.Use(middleware.ErrorHandlerMiddleware())
+
+	auditService := audit.NewDefaultAuditService()
 
 	apiGroup := router.Group("/api")
 	apis.NewGeneralAPI(store).RegisterRoutes(apiGroup)
-	apis.NewFlagAPI(store).RegisterRoutes(apiGroup)
+	apis.NewFlagAPI(store, auditService).RegisterRoutes(apiGroup)
 	apis.NewEnvironmentAPI(store).RegisterRoutes(apiGroup)
 
 	if os.Getenv("GIN_MODE") == "release" {

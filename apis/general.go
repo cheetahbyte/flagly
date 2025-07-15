@@ -3,15 +3,16 @@ package apis
 import (
 	"net/http"
 
-	"github.com/cheetahbyte/flagly/internal/flagly"
+	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/cheetahbyte/flagly/internal/version"
 	"github.com/gin-gonic/gin"
 )
 
 type GeneralAPI struct {
-	store *flagly.Storage
+	store *storage.Storage
 }
 
-func NewGeneralAPI(store *flagly.Storage) *GeneralAPI {
+func NewGeneralAPI(store *storage.Storage) *GeneralAPI {
 	return &GeneralAPI{store: store}
 }
 
@@ -22,7 +23,7 @@ func (api *GeneralAPI) RegisterRoutes(router *gin.RouterGroup) {
 
 func (g *GeneralAPI) GetStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"version": flagly.Version,
+		"version": version.Version,
 	})
 }
 
