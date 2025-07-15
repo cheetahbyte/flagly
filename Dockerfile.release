@@ -25,9 +25,9 @@ ARG BUILD_TIME
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
   -ldflags "-w -s \
-    -X github.com/cheetahbyte/flagly/internal/flagly.Version=${GIT_TAG} \
-    -X github.com/cheetahbyte/flagly/internal/flagly.Commit=${GIT_COMMIT} \
-    -X github.com/cheetahbyte/flagly/internal/flagly.BuildTime=${BUILD_TIME}" \
+    -X github.com/cheetahbyte/flagly/internal/version.Version=${GIT_TAG} \
+    -X github.com/cheetahbyte/flagly/internal/version.Commit=${GIT_COMMIT} \
+    -X github.com/cheetahbyte/flagly/internal/version.BuildTime=${BUILD_TIME}" \
   -o main .
 
 RUN upx --best --lzma -o main-compressed main

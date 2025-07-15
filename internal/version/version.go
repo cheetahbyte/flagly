@@ -1,4 +1,4 @@
-package flagly
+package version
 
 var (
 	Version   = "development"

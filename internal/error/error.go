@@ -1,4 +1,4 @@
-package flagly
+package custom_errors
 
 type APIError struct {
 	Type     string `json:"type,omitempty"`

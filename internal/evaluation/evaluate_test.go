@@ -1,15 +1,17 @@
-package flagly
+package evaluation
 
 import (
 	"strconv"
 	"testing"
+
+	"github.com/cheetahbyte/flagly/pkg/flagly"
 )
 
 func TestEvaluateFlag_UnknownEnvironment(t *testing.T) {
-	flag := Flag{
-		Environments: map[string]Environment{},
+	flag := flagly.Flag{
+		Environments: map[string]flagly.Environment{},
 	}
-	user := User{ID: "123"}
+	user := flagly.User{ID: "123"}
 
 	result := EvaluateFlag(flag, user, "production")
 	if result {
@@ -18,15 +20,15 @@ func TestEvaluateFlag_UnknownEnvironment(t *testing.T) {
 }
 
 func TestEvaluateFlag_PercentageZero(t *testing.T) {
-	flag := Flag{
-		Environments: map[string]Environment{
+	flag := flagly.Flag{
+		Environments: map[string]flagly.Environment{
 			"production": {
 				Enabled: true,
-				Rollout: Rollout{Percentage: 0, Stickiness: "user_id"},
+				Rollout: flagly.Rollout{Percentage: 0, Stickiness: "user_id"},
 			},
 		},
 	}
-	user := User{ID: "user1"}
+	user := flagly.User{ID: "user1"}
 
 	if !EvaluateFlag(flag, user, "production") {
 		t.Errorf("expected true when rollout is 0%% or 100%%, got false")
@@ -34,15 +36,15 @@ func TestEvaluateFlag_PercentageZero(t *testing.T) {
 }
 
 func TestEvaluateFlag_Percentage100(t *testing.T) {
-	flag := Flag{
-		Environments: map[string]Environment{
+	flag := flagly.Flag{
+		Environments: map[string]flagly.Environment{
 			"production": {
 				Enabled: true,
-				Rollout: Rollout{Percentage: 100, Stickiness: "user_id"},
+				Rollout: flagly.Rollout{Percentage: 100, Stickiness: "user_id"},
 			},
 		},
 	}
-	user := User{ID: "user1"}
+	user := flagly.User{ID: "user1"}
 
 	if !EvaluateFlag(flag, user, "production") {
 		t.Errorf("expected true for 100%% rollout")
@@ -50,12 +52,12 @@ func TestEvaluateFlag_Percentage100(t *testing.T) {
 }
 
 func TestEvaluateFlag_ConsistentRollout(t *testing.T) {
-	user := User{ID: "user42"}
-	flag := Flag{
-		Environments: map[string]Environment{
+	user := flagly.User{ID: "user42"}
+	flag := flagly.Flag{
+		Environments: map[string]flagly.Environment{
 			"production": {
 				Enabled: true,
-				Rollout: Rollout{Percentage: 50, Stickiness: "user_id"},
+				Rollout: flagly.Rollout{Percentage: 50, Stickiness: "user_id"},
 			},
 		},
 	}
@@ -84,12 +86,12 @@ func TestEvaluateFlag_WithinRollout(t *testing.T) {
 		t.Fatalf("could not find user ID with bucket < 10")
 	}
 
-	user := User{ID: userID}
-	flag := Flag{
-		Environments: map[string]Environment{
+	user := flagly.User{ID: userID}
+	flag := flagly.Flag{
+		Environments: map[string]flagly.Environment{
 			"production": {
 				Enabled: true,
-				Rollout: Rollout{Percentage: 10, Stickiness: "user_id"},
+				Rollout: flagly.Rollout{Percentage: 10, Stickiness: "user_id"},
 			},
 		},
 	}

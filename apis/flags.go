@@ -4,16 +4,20 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cheetahbyte/flagly/internal/flagly"
+	custom_errors "github.com/cheetahbyte/flagly/internal/error"
+	"github.com/cheetahbyte/flagly/internal/evaluation"
+	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/cheetahbyte/flagly/internal/utils"
+	"github.com/cheetahbyte/flagly/pkg/flagly"
 	"github.com/gin-gonic/gin"
 )
 
 type FlagAPI struct {
-	store        *flagly.Storage
+	store        *storage.Storage
 	auditService flagly.AuditService
 }
 
-func NewFlagAPI(store *flagly.Storage, auditService flagly.AuditService) *FlagAPI {
+func NewFlagAPI(store *storage.Storage, auditService flagly.AuditService) *FlagAPI {
 	return &FlagAPI{store: store, auditService: auditService}
 }
 
@@ -28,7 +32,7 @@ func (api *FlagAPI) GetFlags(c *gin.Context) {
 }
 
 func (api *FlagAPI) GetFlag(c *gin.Context) {
-	logger := flagly.GetLogger(c)
+	logger := utils.GetLogger(c)
 	flagKey := c.Param("flag")
 
 	logger.Infow("Attempting to fetch a single flag",
@@ -48,7 +52,7 @@ func (api *FlagAPI) GetFlag(c *gin.Context) {
 		logger.Warnw(msg,
 			"flag_key", flagKey,
 		)
-		c.Error(flagly.NewAPIError(http.StatusNotFound,
+		c.Error(custom_errors.NewAPIError(http.StatusNotFound,
 			"/errors/flag-not-found",
 			"Flag not found",
 			"The requested flag was not found on the server."))
@@ -68,7 +72,7 @@ type PostEvaluateFlagDTO struct {
 }
 
 func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
-	logger := flagly.GetLogger(c)
+	logger := utils.GetLogger(c)
 	var data PostEvaluateFlagDTO
 
 	if err := c.ShouldBind(&data); err != nil {
@@ -91,14 +95,14 @@ func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
 		logger.Warnw("Evaluation failed because flag was not found",
 			"flag_key", data.Flag,
 		)
-		c.Error(flagly.NewAPIError(http.StatusNotFound,
+		c.Error(custom_errors.NewAPIError(http.StatusNotFound,
 			"/errors/flag-not-found",
 			"Flag not found",
 			"The requested flag was not found on the server."))
 		return
 	}
 
-	result := flagly.EvaluateFlag(*flag, data.User, data.Environment)
+	result := evaluation.EvaluateFlag(*flag, data.User, data.Environment)
 
 	api.auditService.TrackEvaluation(c, *flag, data.User, data.Environment, result)
 
