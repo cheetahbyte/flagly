@@ -42,9 +42,11 @@ func main() {
 	router.Use(flagly.ContextLogger(sugar))
 	router.Use(flagly.ErrorHandlerMiddleware())
 
+	auditService := flagly.NewDefaultAuditService()
+
 	apiGroup := router.Group("/api")
 	apis.NewGeneralAPI(store).RegisterRoutes(apiGroup)
-	apis.NewFlagAPI(store).RegisterRoutes(apiGroup)
+	apis.NewFlagAPI(store, auditService).RegisterRoutes(apiGroup)
 	apis.NewEnvironmentAPI(store).RegisterRoutes(apiGroup)
 
 	if os.Getenv("GIN_MODE") == "release" {

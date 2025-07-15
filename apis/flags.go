@@ -9,11 +9,12 @@ import (
 )
 
 type FlagAPI struct {
-	store *flagly.Storage
+	store        *flagly.Storage
+	auditService flagly.AuditService
 }
 
-func NewFlagAPI(store *flagly.Storage) *FlagAPI {
-	return &FlagAPI{store: store}
+func NewFlagAPI(store *flagly.Storage, auditService flagly.AuditService) *FlagAPI {
+	return &FlagAPI{store: store, auditService: auditService}
 }
 
 func (api *FlagAPI) RegisterRoutes(router *gin.RouterGroup) {
@@ -78,12 +79,6 @@ func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
 		return
 	}
 
-	logger.Infow("Attempting to evaluate a flag",
-		"flag_key", data.Flag,
-		"user_id", data.User.ID,
-		"environment", data.Environment,
-	)
-
 	var flag *flagly.Flag
 	for _, f := range api.store.Flags {
 		if f.Key == data.Flag {
@@ -105,12 +100,7 @@ func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
 
 	result := flagly.EvaluateFlag(*flag, data.User, data.Environment)
 
-	logger.Infow("Flag evaluation completed",
-		"flag_key", flag.Key,
-		"user_id", data.User.ID,
-		"environment", data.Environment,
-		"result", result,
-	)
+	api.auditService.TrackEvaluation(c, *flag, data.User, data.Environment, result)
 
 	c.JSON(200, gin.H{"enabled": result})
 }
