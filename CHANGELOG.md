@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/cheetahbyte/flagly/compare/v0.4.0...v0.4.1) (2025-07-15)
+
+
+### Bug Fixes
+
+* **storage:** expose storage struct ([c8ca7f2](https://github.com/cheetahbyte/flagly/commit/c8ca7f20c305502cde489f5feb7820d437a55b05))
+
 ## [0.4.0](https://github.com/cheetahbyte/flagly/compare/v0.3.1...v0.4.0) (2025-07-15)
 
 
