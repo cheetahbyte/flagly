@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/cheetahbyte/flagly/compare/v0.4.1...v0.4.2) (2025-07-16)
+
+
+### Bug Fixes
+
+* move middleware ([#13](https://github.com/cheetahbyte/flagly/issues/13)) ([95b4db3](https://github.com/cheetahbyte/flagly/commit/95b4db3d77380f1b808bc0ef6460df6dbe4810a2))
+
 ## [0.4.1](https://github.com/cheetahbyte/flagly/compare/v0.4.0...v0.4.1) (2025-07-15)
 
 
