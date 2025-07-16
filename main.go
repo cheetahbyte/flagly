@@ -12,8 +12,8 @@ import (
 
 	"github.com/cheetahbyte/flagly/apis"
 	"github.com/cheetahbyte/flagly/internal/audit"
-	"github.com/cheetahbyte/flagly/internal/middleware"
 	"github.com/cheetahbyte/flagly/internal/storage"
+	"github.com/cheetahbyte/flagly/pkg/flagly/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
