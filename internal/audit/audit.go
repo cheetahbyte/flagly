@@ -6,13 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AuditService interface {
-	TrackEvaluation(c *gin.Context, flag flagly.Flag, user flagly.User, environment string, result bool)
-}
-
 type DefaultAuditService struct{}
 
-func NewDefaultAuditService() AuditService {
+func NewDefaultAuditService() flagly.AuditService {
 	return &DefaultAuditService{}
 }
 

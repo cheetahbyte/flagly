@@ -12,6 +12,7 @@ import (
 
 	"github.com/cheetahbyte/flagly/apis"
 	"github.com/cheetahbyte/flagly/internal/audit"
+	"github.com/cheetahbyte/flagly/internal/evaluation"
 	"github.com/cheetahbyte/flagly/internal/storage"
 	"github.com/cheetahbyte/flagly/pkg/flagly/middleware"
 	"github.com/gin-contrib/cors"
@@ -45,10 +46,11 @@ func main() {
 	router.Use(middleware.ErrorHandlerMiddleware())
 
 	auditService := audit.NewDefaultAuditService()
+	evaluationService := evaluation.NewDefaultAuditService()
 
 	apiGroup := router.Group("/api")
 	apis.NewGeneralAPI(store).RegisterRoutes(apiGroup)
-	apis.NewFlagAPI(store, auditService).RegisterRoutes(apiGroup)
+	apis.NewFlagAPI(store, auditService, evaluationService).RegisterRoutes(apiGroup)
 	apis.NewEnvironmentAPI(store).RegisterRoutes(apiGroup)
 
 	if os.Getenv("GIN_MODE") == "release" {

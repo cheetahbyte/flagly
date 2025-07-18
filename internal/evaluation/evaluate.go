@@ -7,21 +7,25 @@ import (
 	"github.com/spaolacci/murmur3"
 )
 
-// calculates the rollout percentage bucket in which the user is located.
+type DefaultEvaluationService struct{}
+
+func NewDefaultAuditService() flagly.EvaluationService {
+	return &DefaultEvaluationService{}
+}
+
 func calculateRolloutBucket(identifier string) int {
 	hash := murmur3.Sum32([]byte(identifier))
 	return int(hash % 100)
 }
 
-func EvaluateFlag(flag flagly.Flag, user flagly.User, environment string) bool {
-	// check if environment is enabled
+func (s *DefaultEvaluationService) EvaluateFlag(flag flagly.Flag, user flagly.User, environment string) (bool, error) {
 	env, ok := flag.Environments[environment]
 	if !ok {
-		return false
+		return false, nil
 	}
 	fmt.Println(env)
 	if env.Rollout.Percentage == 0 || env.Rollout.Percentage == 100 {
-		return true
+		return true, nil
 	}
 
 	// TODO: make this more dynamic
@@ -35,5 +39,5 @@ func EvaluateFlag(flag flagly.Flag, user flagly.User, environment string) bool {
 
 	// Rollout specific logic
 	hashedPercentage := calculateRolloutBucket(stickiness)
-	return env.Rollout.Percentage > hashedPercentage
+	return env.Rollout.Percentage > hashedPercentage, nil
 }
