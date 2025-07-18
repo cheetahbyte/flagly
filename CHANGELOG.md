@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/cheetahbyte/flagly/compare/v0.4.2...v0.5.0) (2025-07-18)
+
+
+### Features
+
+* implement evaluation service ([#15](https://github.com/cheetahbyte/flagly/issues/15)) ([e3786aa](https://github.com/cheetahbyte/flagly/commit/e3786aac23205ed7f8909650992ac731c07c50ec))
+
 ## [0.4.2](https://github.com/cheetahbyte/flagly/compare/v0.4.1...v0.4.2) (2025-07-16)
 
 
