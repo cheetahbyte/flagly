@@ -8,18 +8,23 @@ import (
 )
 
 func TestEvaluateFlag_UnknownEnvironment(t *testing.T) {
+	service := &DefaultEvaluationService{}
 	flag := flagly.Flag{
 		Environments: map[string]flagly.Environment{},
 	}
 	user := flagly.User{ID: "123"}
 
-	result := EvaluateFlag(flag, user, "production")
+	result, err := service.EvaluateFlag(flag, user, "production")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if result {
 		t.Errorf("expected false for unknown environment, got true")
 	}
 }
 
 func TestEvaluateFlag_PercentageZero(t *testing.T) {
+	service := &DefaultEvaluationService{}
 	flag := flagly.Flag{
 		Environments: map[string]flagly.Environment{
 			"production": {
@@ -30,12 +35,17 @@ func TestEvaluateFlag_PercentageZero(t *testing.T) {
 	}
 	user := flagly.User{ID: "user1"}
 
-	if !EvaluateFlag(flag, user, "production") {
-		t.Errorf("expected true when rollout is 0%% or 100%%, got false")
+	result, err := service.EvaluateFlag(flag, user, "production")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !result {
+		t.Errorf("expected true when rollout is 0%%, got false")
 	}
 }
 
 func TestEvaluateFlag_Percentage100(t *testing.T) {
+	service := &DefaultEvaluationService{}
 	flag := flagly.Flag{
 		Environments: map[string]flagly.Environment{
 			"production": {
@@ -46,12 +56,17 @@ func TestEvaluateFlag_Percentage100(t *testing.T) {
 	}
 	user := flagly.User{ID: "user1"}
 
-	if !EvaluateFlag(flag, user, "production") {
-		t.Errorf("expected true for 100%% rollout")
+	result, err := service.EvaluateFlag(flag, user, "production")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !result {
+		t.Errorf("expected true for 100%% rollout, got false")
 	}
 }
 
 func TestEvaluateFlag_ConsistentRollout(t *testing.T) {
+	service := &DefaultEvaluationService{}
 	user := flagly.User{ID: "user42"}
 	flag := flagly.Flag{
 		Environments: map[string]flagly.Environment{
@@ -62,17 +77,21 @@ func TestEvaluateFlag_ConsistentRollout(t *testing.T) {
 		},
 	}
 
-	// Should always return the same result for the same user
-	result1 := EvaluateFlag(flag, user, "production")
-	result2 := EvaluateFlag(flag, user, "production")
+	result1, err1 := service.EvaluateFlag(flag, user, "production")
+	result2, err2 := service.EvaluateFlag(flag, user, "production")
 
+	if err1 != nil || err2 != nil {
+		t.Fatalf("unexpected error(s): %v, %v", err1, err2)
+	}
 	if result1 != result2 {
 		t.Errorf("expected consistent result for same user, got %v and %v", result1, result2)
 	}
 }
 
 func TestEvaluateFlag_WithinRollout(t *testing.T) {
-	// Find a user ID that gives a bucket under 10
+	service := &DefaultEvaluationService{}
+
+	// Find a user ID that hashes to a bucket < 10
 	var userID string
 	for i := 0; i < 10000; i++ {
 		id := "user" + strconv.Itoa(i)
@@ -81,7 +100,6 @@ func TestEvaluateFlag_WithinRollout(t *testing.T) {
 			break
 		}
 	}
-
 	if userID == "" {
 		t.Fatalf("could not find user ID with bucket < 10")
 	}
@@ -96,7 +114,11 @@ func TestEvaluateFlag_WithinRollout(t *testing.T) {
 		},
 	}
 
-	if !EvaluateFlag(flag, user, "production") {
+	result, err := service.EvaluateFlag(flag, user, "production")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !result {
 		t.Errorf("expected true for user within rollout range")
 	}
 }

@@ -5,19 +5,19 @@ import (
 	"net/http"
 
 	custom_errors "github.com/cheetahbyte/flagly/internal/error"
-	"github.com/cheetahbyte/flagly/internal/evaluation"
 	"github.com/cheetahbyte/flagly/internal/utils"
 	"github.com/cheetahbyte/flagly/pkg/flagly"
 	"github.com/gin-gonic/gin"
 )
 
 type FlagAPI struct {
-	store        *flagly.Storage
-	auditService flagly.AuditService
+	store             *flagly.Storage
+	auditService      flagly.AuditService
+	evaluationService flagly.EvaluationService
 }
 
-func NewFlagAPI(store *flagly.Storage, auditService flagly.AuditService) *FlagAPI {
-	return &FlagAPI{store: store, auditService: auditService}
+func NewFlagAPI(store *flagly.Storage, auditService flagly.AuditService, evaluationService flagly.EvaluationService) *FlagAPI {
+	return &FlagAPI{store: store, auditService: auditService, evaluationService: evaluationService}
 }
 
 func (api *FlagAPI) RegisterRoutes(router *gin.RouterGroup) {
@@ -101,7 +101,7 @@ func (api *FlagAPI) PostEvaluateFlag(c *gin.Context) {
 		return
 	}
 
-	result := evaluation.EvaluateFlag(*flag, data.User, data.Environment)
+	result, _ := api.evaluationService.EvaluateFlag(*flag, data.User, data.Environment)
 
 	api.auditService.TrackEvaluation(c, *flag, data.User, data.Environment, result)
 
